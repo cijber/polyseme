@@ -1,0 +1,12 @@
+[package]
+name = "polyseme-fetch"
+version = "0.1.0"
+authors = ["eater <=@eater.me>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+polyseme = { path = "../polyseme" }
+trust-dns-resolver = "0.19"
+clap = "2.33"
