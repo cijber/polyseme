@@ -1,0 +1,42 @@
+HOTP Indexed DNS
+
+A protocol for file storage and retrieval using DNS records as a substrate.
+
+1. Index
+
+The index shall consist of a series of key values obtained using the HMAC-based One Time Password algorithm. The HOTP length shall be set to 63 characters. The 'key' shall be a memorizable secret based on the 'diceware' algorithm. Each file stored will have a separate key.
+
+[ Optionally: this value might be more useful hashed or encoded? because HOTP only generates integers]
+
+2. Subdomain
+
+For a given domain 'example.com' a subdomain shall be allocated for each file - viz. \"file1.example.com\" - for which the indices calculated above shall be used as subdomains - e.g. \"123[...]63.file1.example.com\"
+
+3. File Preparation
+
+Files to be stored will be base64 encoded. The resulting base64-encoded file shall be split into slices of 255 characters, padding if necessary. Each group of 250 slices will have a SHA-256 hash calculated for a string consisting of the 250 slices concatenated.
+
+[ Please note: this will demand TCP based DNS. If it's desirable to stay in UDP then the total size has to be <512 octets - so that would require each record to have a checksum. Inefficient! ]
+
+[ Please note, the whole DNS record MUST fit within 65534 octets. ]
+
+4. File storage
+
+Beginning with the first HOTP code, a TXT record shall be published consisting of a set of 251 strings assigned to a URI consisting of [HOTP].[filename-or-other-distinguishing-value].domain.tld
+
+The strings shall have the integrity hash first, followed by the content to be published in this record.
+
+1=[SHA-256 Value]
+2=[content]
+...
+N < 251=[content]
+
+The final record shall consist of a hash of the shared key; this shall indicate EOF.
+
+5. File retrieval
+
+The client shall, beginning with the first HOTP value, construct a storage URI as indicated in [4]. Then, the client shall query DNS for the TXT record associated with that URI.
+
+Having retrieved the TXT record, the client shall extract the hash from the record and use it to validate that the remaining content has been retrieved. This remaining data shall be concatenated with the prior data and used to reconstruct the base64 archive, which will then be decoded to the original form.
+
+When the client decodes a string containing a hash of the shared key, it will use this as the EOF indication.

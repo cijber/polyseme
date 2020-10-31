@@ -1,0 +1,2 @@
+[workspace]
+members = ["polyseme", "polyseme-zone-gen", "polyseme-fetch"]
