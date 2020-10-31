@@ -6,9 +6,13 @@ use std::{fmt, mem};
 
 #[derive(Clone)]
 pub struct ContentSet {
+    /// HOTP generated name
     pub name: String,
+    /// Current size of the DNS record
     pub size: usize,
+    /// Typed string entries
     pub entries: Vec<ContentEntry>,
+    /// Context that will generate the final hash
     pub hash_context: Option<Context>,
 }
 
@@ -39,6 +43,7 @@ impl ContentSet {
         }
     }
 
+    /// Calculate the final hash
     pub fn calculate_hash(&mut self) {
         if let ContentEntry::Hash(hash) = &mut self.entries[0] {
             let old = mem::replace(&mut self.hash_context, None);
@@ -50,6 +55,7 @@ impl ContentSet {
         }
     }
 
+    /// Add an entry to this ContentSet
     pub fn add_entry(&mut self, entry: ContentEntry) -> Result<(), ContentEntry> {
         if self.size + entry.dns_size() > u16::MAX as usize {
             return Err(entry);
